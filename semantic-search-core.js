@@ -593,7 +593,14 @@ var SemanticSearchCore = (() => {
     };
   }
 
-  async function searchLibrary({ query, libraryID, limit = 150 }) {
+  async function searchLibrary({
+    query,
+    libraryID,
+    limit = 150,
+    minScoreRatio = 0.22,
+    minScoreFloor = 4.2,
+    fallbackLimit = 25,
+  }) {
     const trimmedQuery = String(query || "").trim();
     if (!trimmedQuery) {
       return {
@@ -630,9 +637,9 @@ var SemanticSearchCore = (() => {
 
     scoredResults.sort((left, right) => right.score - left.score);
     const bestScore = scoredResults[0]?.score || 0;
-    const threshold = bestScore ? Math.max(4.2, bestScore * 0.22) : 0;
+    const threshold = bestScore ? Math.max(minScoreFloor, bestScore * minScoreRatio) : 0;
     const filtered = scoredResults.filter((entry) => entry.score >= threshold).slice(0, limit);
-    const fallback = scoredResults.slice(0, Math.min(limit, 25));
+    const fallback = scoredResults.slice(0, Math.min(limit, fallbackLimit));
     const results = filtered.length ? filtered : fallback;
 
     return {
@@ -709,16 +716,17 @@ var SemanticSearchCore = (() => {
     return selectedItems.find((item) => item?.isRegularItem?.()) || null;
   }
 
-  function buildCollectionName(query) {
+  function buildCollectionName(query, prefix) {
     const timestamp = new Date().toISOString().slice(0, 16).replace("T", " ");
     const shortQuery = String(query || "").replace(/\s+/g, " ").trim().slice(0, 48);
-    return `${t("relatedCollectionPrefix")} - ${shortQuery || "Query"} - ${timestamp}`;
+    const resolvedPrefix = String(prefix || "").trim() || t("relatedCollectionPrefix");
+    return `${resolvedPrefix} - ${shortQuery || "Query"} - ${timestamp}`;
   }
 
-  async function saveResultsToCollection({ libraryID, query, itemIDs }) {
+  async function saveResultsToCollection({ libraryID, query, itemIDs, collectionPrefix }) {
     const collection = new Zotero.Collection();
     collection.libraryID = libraryID;
-    collection.name = buildCollectionName(query);
+    collection.name = buildCollectionName(query, collectionPrefix);
     await collection.saveTx();
 
     if (itemIDs?.length) {

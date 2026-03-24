@@ -6,14 +6,52 @@ var SemanticSearchSettings = (() => {
 
   const DEFAULTS = Object.freeze({
     "search.resultLimit": 50,
+    "search.minScoreRatio": 0.22,
+    "search.minScoreFloor": 4.2,
+    "search.fallbackLimit": 25,
+    "search.collectionPrefix": "",
     "llm.enabled": false,
+    "llm.provider": "openai",
     "llm.baseURL": "https://api.openai.com/v1",
     "llm.apiKey": "",
     "llm.model": "gpt-4.1-mini",
     "llm.candidateCount": 20,
     "llm.timeoutSeconds": 45,
+    "llm.temperature": 0,
+    "llm.maxTokens": 256,
     "llm.systemPrompt": "",
   });
+
+  const PROVIDER_PRESETS = Object.freeze({
+    openai: Object.freeze({
+      baseURL: "https://api.openai.com/v1",
+      defaultModel: "gpt-4.1-mini",
+    }),
+    openrouter: Object.freeze({
+      baseURL: "https://openrouter.ai/api/v1",
+      defaultModel: "openai/gpt-4.1-mini",
+    }),
+    ollama: Object.freeze({
+      baseURL: "http://127.0.0.1:11434/v1",
+      defaultModel: "qwen2.5:7b-instruct",
+    }),
+    lmstudio: Object.freeze({
+      baseURL: "http://127.0.0.1:1234/v1",
+      defaultModel: "local-model",
+    }),
+    custom: Object.freeze({
+      baseURL: "",
+      defaultModel: "",
+    }),
+  });
+
+  const MODEL_PRESETS = Object.freeze([
+    "gpt-4.1-mini",
+    "gpt-4.1",
+    "deepseek-chat",
+    "qwen2.5:7b-instruct",
+    "llama3.1:8b-instruct",
+  ]);
 
   const LOCALE_TEXT = {
     en: {
@@ -22,7 +60,7 @@ var SemanticSearchSettings = (() => {
       llmIncomplete: "LLM config incomplete",
       llmReady: (model) => `LLM: ${model}`,
       llmReordered: (rank, note) => `LLM rerank #${rank}${note ? `: ${note}` : ""}`,
-      missingConfig: "Base URL, API key, and model are required.",
+      missingConfig: "Base URL and model are required.",
     },
     zh: {
       llmEnabled: "已启用 LLM 重排",
@@ -30,7 +68,7 @@ var SemanticSearchSettings = (() => {
       llmIncomplete: "LLM 配置不完整",
       llmReady: (model) => `LLM：${model}`,
       llmReordered: (rank, note) => `LLM 重排 #${rank}${note ? `：${note}` : ""}`,
-      missingConfig: "请填写 Base URL、API Key 和模型名。",
+      missingConfig: "请填写 Base URL 和模型名。",
     },
   };
 
@@ -69,23 +107,49 @@ var SemanticSearchSettings = (() => {
     return Math.min(Math.max(number, min), max);
   }
 
+  function coerceString(value, fallback = "") {
+    const text = String(value ?? "").trim();
+    return text || fallback;
+  }
+
+  function coerceProvider(value) {
+    const provider = String(value || "").trim().toLowerCase();
+    return PROVIDER_PRESETS[provider] ? provider : DEFAULTS["llm.provider"];
+  }
+
   function getRawPref(key) {
     const value = Zotero.Prefs.get(prefName(key));
     return value === undefined ? DEFAULTS[key] : value;
+  }
+
+  function ensureDefaults() {
+    for (const [key, value] of Object.entries(DEFAULTS)) {
+      const fullName = prefName(key);
+      if (Zotero.Prefs.get(fullName) === undefined) {
+        Zotero.Prefs.set(fullName, value);
+      }
+    }
   }
 
   function getDefaultsSnapshot() {
     return {
       search: {
         resultLimit: DEFAULTS["search.resultLimit"],
+        minScoreRatio: DEFAULTS["search.minScoreRatio"],
+        minScoreFloor: DEFAULTS["search.minScoreFloor"],
+        fallbackLimit: DEFAULTS["search.fallbackLimit"],
+        collectionPrefix: DEFAULTS["search.collectionPrefix"],
       },
       llm: {
         enabled: DEFAULTS["llm.enabled"],
+        provider: DEFAULTS["llm.provider"],
         baseURL: DEFAULTS["llm.baseURL"],
         apiKey: DEFAULTS["llm.apiKey"],
         model: DEFAULTS["llm.model"],
         candidateCount: DEFAULTS["llm.candidateCount"],
         timeoutSeconds: DEFAULTS["llm.timeoutSeconds"],
+        temperature: DEFAULTS["llm.temperature"],
+        maxTokens: DEFAULTS["llm.maxTokens"],
         systemPrompt: DEFAULTS["llm.systemPrompt"],
       },
     };
@@ -95,9 +159,14 @@ var SemanticSearchSettings = (() => {
     return {
       search: {
         resultLimit: coerceNumber(getRawPref("search.resultLimit"), DEFAULTS["search.resultLimit"], 10, 300),
+        minScoreRatio: coerceNumber(getRawPref("search.minScoreRatio"), DEFAULTS["search.minScoreRatio"], 0.05, 0.6),
+        minScoreFloor: coerceNumber(getRawPref("search.minScoreFloor"), DEFAULTS["search.minScoreFloor"], 1, 12),
+        fallbackLimit: coerceNumber(getRawPref("search.fallbackLimit"), DEFAULTS["search.fallbackLimit"], 5, 100),
+        collectionPrefix: String(getRawPref("search.collectionPrefix") || ""),
       },
       llm: {
         enabled: coerceBoolean(getRawPref("llm.enabled"), DEFAULTS["llm.enabled"]),
+        provider: coerceProvider(getRawPref("llm.provider")),
         baseURL: String(getRawPref("llm.baseURL") || "").trim() || DEFAULTS["llm.baseURL"],
         apiKey: String(getRawPref("llm.apiKey") || "").trim(),
         model: String(getRawPref("llm.model") || "").trim() || DEFAULTS["llm.model"],
@@ -113,6 +182,8 @@ var SemanticSearchSettings = (() => {
           10,
           180
         ),
+        temperature: coerceNumber(getRawPref("llm.temperature"), DEFAULTS["llm.temperature"], 0, 2),
+        maxTokens: coerceNumber(getRawPref("llm.maxTokens"), DEFAULTS["llm.maxTokens"], 32, 4096),
         systemPrompt: String(getRawPref("llm.systemPrompt") || ""),
       },
     };
@@ -122,9 +193,29 @@ var SemanticSearchSettings = (() => {
     const snapshot = {
       search: {
         resultLimit: coerceNumber(settings?.search?.resultLimit, DEFAULTS["search.resultLimit"], 10, 300),
+        minScoreRatio: coerceNumber(
+          settings?.search?.minScoreRatio,
+          DEFAULTS["search.minScoreRatio"],
+          0.05,
+          0.6
+        ),
+        minScoreFloor: coerceNumber(
+          settings?.search?.minScoreFloor,
+          DEFAULTS["search.minScoreFloor"],
+          1,
+          12
+        ),
+        fallbackLimit: coerceNumber(
+          settings?.search?.fallbackLimit,
+          DEFAULTS["search.fallbackLimit"],
+          5,
+          100
+        ),
+        collectionPrefix: String(settings?.search?.collectionPrefix || "").trim(),
       },
       llm: {
         enabled: coerceBoolean(settings?.llm?.enabled, DEFAULTS["llm.enabled"]),
+        provider: coerceProvider(settings?.llm?.provider),
         baseURL: String(settings?.llm?.baseURL || DEFAULTS["llm.baseURL"]).trim(),
         apiKey: String(settings?.llm?.apiKey || "").trim(),
         model: String(settings?.llm?.model || DEFAULTS["llm.model"]).trim(),
@@ -140,17 +231,36 @@ var SemanticSearchSettings = (() => {
           10,
           180
         ),
+        temperature: coerceNumber(
+          settings?.llm?.temperature,
+          DEFAULTS["llm.temperature"],
+          0,
+          2
+        ),
+        maxTokens: coerceNumber(
+          settings?.llm?.maxTokens,
+          DEFAULTS["llm.maxTokens"],
+          32,
+          4096
+        ),
         systemPrompt: String(settings?.llm?.systemPrompt || ""),
       },
     };
 
     Zotero.Prefs.set(prefName("search.resultLimit"), snapshot.search.resultLimit);
+    Zotero.Prefs.set(prefName("search.minScoreRatio"), snapshot.search.minScoreRatio);
+    Zotero.Prefs.set(prefName("search.minScoreFloor"), snapshot.search.minScoreFloor);
+    Zotero.Prefs.set(prefName("search.fallbackLimit"), snapshot.search.fallbackLimit);
+    Zotero.Prefs.set(prefName("search.collectionPrefix"), snapshot.search.collectionPrefix);
     Zotero.Prefs.set(prefName("llm.enabled"), snapshot.llm.enabled);
+    Zotero.Prefs.set(prefName("llm.provider"), snapshot.llm.provider);
     Zotero.Prefs.set(prefName("llm.baseURL"), snapshot.llm.baseURL);
     Zotero.Prefs.set(prefName("llm.apiKey"), snapshot.llm.apiKey);
     Zotero.Prefs.set(prefName("llm.model"), snapshot.llm.model);
     Zotero.Prefs.set(prefName("llm.candidateCount"), snapshot.llm.candidateCount);
     Zotero.Prefs.set(prefName("llm.timeoutSeconds"), snapshot.llm.timeoutSeconds);
+    Zotero.Prefs.set(prefName("llm.temperature"), snapshot.llm.temperature);
+    Zotero.Prefs.set(prefName("llm.maxTokens"), snapshot.llm.maxTokens);
     Zotero.Prefs.set(prefName("llm.systemPrompt"), snapshot.llm.systemPrompt);
     return snapshot;
   }
@@ -186,7 +296,7 @@ var SemanticSearchSettings = (() => {
   }
 
   function isLLMConfigured(settings = getAll()) {
-    return Boolean(settings.llm.enabled && settings.llm.baseURL && settings.llm.apiKey && settings.llm.model);
+    return Boolean(settings.llm.enabled && settings.llm.baseURL && settings.llm.model);
   }
 
   function getLLMStatus(settings = getAll()) {
@@ -317,7 +427,7 @@ var SemanticSearchSettings = (() => {
     }
 
     const endpoint = buildEndpoint(settings.llm.baseURL);
-    if (!endpoint || !settings.llm.apiKey || !settings.llm.model) {
+    if (!endpoint || !settings.llm.model) {
       throw new Error(t("missingConfig"));
     }
 
@@ -330,12 +440,16 @@ var SemanticSearchSettings = (() => {
     }
 
     try {
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      if (settings.llm.apiKey) {
+        headers.Authorization = `Bearer ${settings.llm.apiKey}`;
+      }
+
       const response = await fetchImpl(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${settings.llm.apiKey}`,
-        },
+        headers,
         body: JSON.stringify(body),
         signal: abortController?.signal,
       });
@@ -376,7 +490,8 @@ var SemanticSearchSettings = (() => {
         fetchImpl,
         body: {
           model: settings.llm.model,
-          temperature: 0,
+          temperature: settings.llm.temperature,
+          ...(settings.llm.maxTokens ? { max_tokens: settings.llm.maxTokens } : {}),
           messages: [
             {
               role: "system",
@@ -421,7 +536,7 @@ var SemanticSearchSettings = (() => {
   }
 
   async function testConnection({ settings = getAll(), fetchImpl }) {
-    if (!settings.llm.baseURL || !settings.llm.apiKey || !settings.llm.model) {
+    if (!settings.llm.baseURL || !settings.llm.model) {
       throw new Error(t("missingConfig"));
     }
 
@@ -430,7 +545,8 @@ var SemanticSearchSettings = (() => {
       fetchImpl,
       body: {
         model: settings.llm.model,
-        temperature: 0,
+        temperature: settings.llm.temperature,
+        ...(settings.llm.maxTokens ? { max_tokens: settings.llm.maxTokens } : {}),
         messages: [
           {
             role: "system",
@@ -457,6 +573,9 @@ var SemanticSearchSettings = (() => {
 
   return {
     DEFAULTS,
+    MODEL_PRESETS,
+    PROVIDER_PRESETS,
+    ensureDefaults,
     getAll,
     getDefaultsSnapshot,
     getLLMStatus,
@@ -470,3 +589,7 @@ var SemanticSearchSettings = (() => {
     testConnection,
   };
 })();
+
+if (typeof globalThis !== "undefined") {
+  globalThis.SemanticSearchSettings = SemanticSearchSettings;
+}

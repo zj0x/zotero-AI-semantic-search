@@ -79,6 +79,7 @@ body,
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -139,6 +140,7 @@ button {
 input[type="text"],
 input[type="password"],
 input[type="number"],
+select,
 textarea {
   width: 100%;
   border: 1px solid var(--border-0);
@@ -146,6 +148,11 @@ textarea {
   background: white;
   padding: 12px 14px;
   color: var(--ink-0);
+}
+
+.field span {
+  color: var(--ink-0);
+  font-weight: 600;
 }
 
 textarea {

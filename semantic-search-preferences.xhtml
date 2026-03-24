@@ -1,0 +1,221 @@
+<vbox
+  id="zotero-prefpane-semantic-search"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+>
+  <preferences>
+    <preference id="extensions.semantic-library-search.search.resultLimit" name="extensions.semantic-library-search.search.resultLimit" type="int" />
+    <preference id="extensions.semantic-library-search.search.minScoreRatio" name="extensions.semantic-library-search.search.minScoreRatio" type="string" />
+    <preference id="extensions.semantic-library-search.search.minScoreFloor" name="extensions.semantic-library-search.search.minScoreFloor" type="string" />
+    <preference id="extensions.semantic-library-search.search.fallbackLimit" name="extensions.semantic-library-search.search.fallbackLimit" type="int" />
+    <preference id="extensions.semantic-library-search.search.collectionPrefix" name="extensions.semantic-library-search.search.collectionPrefix" type="string" />
+    <preference id="extensions.semantic-library-search.llm.enabled" name="extensions.semantic-library-search.llm.enabled" type="bool" />
+    <preference id="extensions.semantic-library-search.llm.provider" name="extensions.semantic-library-search.llm.provider" type="string" />
+    <preference id="extensions.semantic-library-search.llm.baseURL" name="extensions.semantic-library-search.llm.baseURL" type="string" />
+    <preference id="extensions.semantic-library-search.llm.apiKey" name="extensions.semantic-library-search.llm.apiKey" type="string" />
+    <preference id="extensions.semantic-library-search.llm.model" name="extensions.semantic-library-search.llm.model" type="string" />
+    <preference id="extensions.semantic-library-search.llm.candidateCount" name="extensions.semantic-library-search.llm.candidateCount" type="int" />
+    <preference id="extensions.semantic-library-search.llm.timeoutSeconds" name="extensions.semantic-library-search.llm.timeoutSeconds" type="int" />
+    <preference id="extensions.semantic-library-search.llm.temperature" name="extensions.semantic-library-search.llm.temperature" type="string" />
+    <preference id="extensions.semantic-library-search.llm.maxTokens" name="extensions.semantic-library-search.llm.maxTokens" type="int" />
+    <preference id="extensions.semantic-library-search.llm.systemPrompt" name="extensions.semantic-library-search.llm.systemPrompt" type="string" />
+  </preferences>
+
+  <groupbox>
+    <label>
+      <html:h1>语义搜索设置</html:h1>
+    </label>
+    <description>这里显示的是插件的稳定设置页。API 连通性测试仍可在 Tools -> 语义搜索设置... 中执行。</description>
+  </groupbox>
+
+  <groupbox>
+    <label>
+      <html:h2>本地搜索</html:h2>
+    </label>
+
+    <hbox align="center">
+      <label style="width: 180px;">最多显示结果数</label>
+      <html:input
+        id="semantic-search-result-limit"
+        type="number"
+        min="10"
+        max="300"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.search.resultLimit"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">兜底结果数量</label>
+      <html:input
+        id="semantic-search-fallback-limit"
+        type="number"
+        min="5"
+        max="100"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.search.fallbackLimit"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">相对分数阈值</label>
+      <html:input
+        id="semantic-search-min-score-ratio"
+        type="number"
+        min="0.05"
+        max="0.6"
+        step="0.01"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.search.minScoreRatio"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">绝对分数下限</label>
+      <html:input
+        id="semantic-search-min-score-floor"
+        type="number"
+        min="1"
+        max="12"
+        step="0.1"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.search.minScoreFloor"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">保存结果集合名前缀</label>
+      <html:input
+        id="semantic-search-collection-prefix"
+        type="text"
+        style="width: 360px;"
+        preference="extensions.semantic-library-search.search.collectionPrefix"
+      ></html:input>
+    </hbox>
+
+    <description>调高阈值会让结果更严格，调低则更宽松。兜底结果数量用于避免阈值过高时没有任何结果。</description>
+  </groupbox>
+
+  <groupbox>
+    <label>
+      <html:h2>LLM 重排</html:h2>
+    </label>
+
+    <checkbox
+      id="semantic-search-llm-enabled"
+      label="启用 OpenAI-compatible API 重排"
+      native="true"
+      preference="extensions.semantic-library-search.llm.enabled"
+    />
+
+    <hbox align="center">
+      <label style="width: 180px;">提供商预设</label>
+      <menulist
+        id="semantic-search-llm-provider"
+        native="true"
+        style="width: 220px;"
+        preference="extensions.semantic-library-search.llm.provider"
+      >
+        <menupopup>
+          <menuitem value="openai" label="OpenAI"></menuitem>
+          <menuitem value="openrouter" label="OpenRouter"></menuitem>
+          <menuitem value="ollama" label="Ollama"></menuitem>
+          <menuitem value="lmstudio" label="LM Studio"></menuitem>
+          <menuitem value="custom" label="Custom"></menuitem>
+        </menupopup>
+      </menulist>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">模型名</label>
+      <html:input
+        id="semantic-search-llm-model"
+        type="text"
+        style="width: 360px;"
+        preference="extensions.semantic-library-search.llm.model"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">API Base URL</label>
+      <html:input
+        id="semantic-search-llm-base-url"
+        type="text"
+        style="width: 480px;"
+        preference="extensions.semantic-library-search.llm.baseURL"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">API Key</label>
+      <html:input
+        id="semantic-search-llm-api-key"
+        type="password"
+        style="width: 360px;"
+        preference="extensions.semantic-library-search.llm.apiKey"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">候选条目数</label>
+      <html:input
+        id="semantic-search-llm-candidate-count"
+        type="number"
+        min="5"
+        max="50"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.llm.candidateCount"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">超时时间（秒）</label>
+      <html:input
+        id="semantic-search-llm-timeout"
+        type="number"
+        min="10"
+        max="180"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.llm.timeoutSeconds"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">采样温度</label>
+      <html:input
+        id="semantic-search-llm-temperature"
+        type="number"
+        min="0"
+        max="2"
+        step="0.1"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.llm.temperature"
+      ></html:input>
+    </hbox>
+
+    <hbox align="center">
+      <label style="width: 180px;">最大返回 token 数</label>
+      <html:input
+        id="semantic-search-llm-max-tokens"
+        type="number"
+        min="32"
+        max="4096"
+        step="32"
+        style="width: 180px;"
+        preference="extensions.semantic-library-search.llm.maxTokens"
+      ></html:input>
+    </hbox>
+
+    <vbox>
+      <label>附加系统提示词</label>
+      <html:textarea
+        id="semantic-search-llm-system-prompt"
+        rows="8"
+        style="min-height: 160px; width: 100%; resize: vertical;"
+        preference="extensions.semantic-library-search.llm.systemPrompt"
+      ></html:textarea>
+    </vbox>
+
+    <description>适用于 OpenAI、OpenRouter、Ollama、LM Studio 等兼容 /chat/completions 的接口。本地模型接口通常允许 API Key 留空。</description>
+  </groupbox>
+</vbox>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Semantic Library Search",
-  "version": "0.2.3",
+  "version": "0.2.10",
   "description": "List related papers from the current Zotero library with semantic-style local ranking.",
   "author": "OpenAI Codex",
   "homepage_url": "https://example.com/semantic-library-search",

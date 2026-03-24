@@ -206,6 +206,9 @@ var SemanticSearchWindow = (() => {
         query,
         libraryID: launchState.libraryID || Zotero.Libraries.userLibraryID,
         limit: settings.search.resultLimit,
+        minScoreRatio: settings.search.minScoreRatio,
+        minScoreFloor: settings.search.minScoreFloor,
+        fallbackLimit: settings.search.fallbackLimit,
       });
       let extraStatus = "";
 
@@ -274,6 +277,7 @@ var SemanticSearchWindow = (() => {
         libraryID: state.currentResult.libraryID,
         query: state.currentResult.query,
         itemIDs: state.currentResult.results.map((entry) => entry.itemID),
+        collectionPrefix: SemanticSearchSettings.getAll().search.collectionPrefix,
       });
       setStatus(ui("collectionSaved", saved.name));
     } catch (error) {

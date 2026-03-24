@@ -20,6 +20,7 @@ INCLUDE_FILES = [
     "semantic-search.xhtml",
     "semantic-search.css",
     "semantic-search-settings.xhtml",
+    "semantic-search-preferences.xhtml",
     "semantic-search-settings.css",
     "icons/semantic-search.svg",
 ]
