@@ -1,0 +1,167 @@
+:root {
+  --surface-0: #f7f4ee;
+  --surface-1: #fffdfa;
+  --surface-2: #efe8dc;
+  --ink-0: #1d2430;
+  --ink-1: #4d5868;
+  --ink-2: #6d7785;
+  --accent-0: #0f766e;
+  --accent-1: #d9f0ea;
+  --accent-2: #116e63;
+  --shadow-0: 0 18px 48px rgba(18, 28, 45, 0.08);
+  --border-0: rgba(29, 36, 48, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+window,
+html,
+body,
+#settings-shell {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.1), transparent 24%),
+    linear-gradient(180deg, #fbf9f5 0%, var(--surface-0) 100%);
+  color: var(--ink-0);
+  font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Segoe UI", sans-serif;
+}
+
+#settings-shell {
+  padding: 24px;
+}
+
+.hero,
+.card,
+.status-card {
+  background: rgba(255, 253, 250, 0.94);
+  border: 1px solid var(--border-0);
+  box-shadow: var(--shadow-0);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent-0);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.subtitle {
+  margin: 10px 0 0;
+  max-width: 620px;
+  color: var(--ink-1);
+  line-height: 1.5;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  background: var(--ink-0);
+  color: white;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+#test-connection,
+#close-settings {
+  background: var(--surface-2);
+  color: var(--ink-0);
+}
+
+#save-settings {
+  background: linear-gradient(135deg, var(--accent-0), var(--accent-2));
+}
+
+.card {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.card h2 {
+  margin: 0 0 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea {
+  width: 100%;
+  border: 1px solid var(--border-0);
+  border-radius: 14px;
+  background: white;
+  padding: 12px 14px;
+  color: var(--ink-0);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.help {
+  margin: 0;
+  color: var(--ink-1);
+  line-height: 1.45;
+}
+
+.status-card {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  color: var(--ink-1);
+}

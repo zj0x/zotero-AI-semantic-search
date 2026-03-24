@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<window
+  id="semantic-search-settings-window"
+  title="Semantic Search Settings"
+  width="860"
+  height="760"
+  persist="screenX screenY width height"
+  windowtype="semantic-search:settings"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+>
+  <html:link rel="stylesheet" href="semantic-search-settings.css"/>
+
+  <vbox flex="1">
+    <html:div id="settings-shell">
+      <html:section class="hero">
+        <html:div>
+          <html:p class="eyebrow" id="settings-eyebrow"></html:p>
+          <html:h1 id="settings-title"></html:h1>
+          <html:p class="subtitle" id="settings-subtitle"></html:p>
+        </html:div>
+        <html:div class="hero-actions">
+          <html:button id="test-connection" type="button"></html:button>
+          <html:button id="save-settings" type="button"></html:button>
+          <html:button id="reset-settings" type="button"></html:button>
+          <html:button id="close-settings" type="button"></html:button>
+        </html:div>
+      </html:section>
+
+      <html:section class="card">
+        <html:h2 id="search-section-title"></html:h2>
+        <html:label class="field">
+          <html:span id="result-limit-label"></html:span>
+          <html:input id="result-limit" type="number" min="10" max="300"/>
+        </html:label>
+        <html:p class="help" id="result-limit-help"></html:p>
+      </html:section>
+
+      <html:section class="card">
+        <html:h2 id="llm-section-title"></html:h2>
+        <html:label class="checkbox-row">
+          <html:input id="llm-enabled" type="checkbox"/>
+          <html:span id="llm-enabled-label"></html:span>
+        </html:label>
+
+        <html:div class="grid two-col">
+          <html:label class="field">
+            <html:span id="llm-base-url-label"></html:span>
+            <html:input id="llm-base-url" type="text"/>
+          </html:label>
+
+          <html:label class="field">
+            <html:span id="llm-model-label"></html:span>
+            <html:input id="llm-model" type="text"/>
+          </html:label>
+
+          <html:label class="field">
+            <html:span id="llm-api-key-label"></html:span>
+            <html:input id="llm-api-key" type="password"/>
+          </html:label>
+
+          <html:label class="field">
+            <html:span id="llm-candidate-count-label"></html:span>
+            <html:input id="llm-candidate-count" type="number" min="5" max="50"/>
+          </html:label>
+
+          <html:label class="field">
+            <html:span id="llm-timeout-label"></html:span>
+            <html:input id="llm-timeout" type="number" min="10" max="180"/>
+          </html:label>
+        </html:div>
+
+        <html:label class="field">
+          <html:span id="llm-system-prompt-label"></html:span>
+          <html:textarea id="llm-system-prompt" rows="6"></html:textarea>
+        </html:label>
+
+        <html:p class="help" id="llm-help"></html:p>
+      </html:section>
+
+      <html:section class="status-card">
+        <html:span id="settings-status"></html:span>
+      </html:section>
+    </html:div>
+  </vbox>
+
+  <script src="semantic-search-settings.js"></script>
+  <script src="semantic-search-settings-window.js"></script>
+</window>

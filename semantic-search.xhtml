@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<window
+  id="semantic-search-window"
+  title="Semantic Search"
+  width="1180"
+  height="780"
+  persist="screenX screenY width height"
+  windowtype="semantic-search:window"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+>
+  <html:link rel="localization" href="semantic-search.ftl"/>
+  <html:link rel="stylesheet" href="semantic-search.css"/>
+
+  <vbox flex="1">
+    <html:div id="app-shell">
+      <html:section class="hero">
+        <html:div>
+          <html:p class="eyebrow" data-l10n-id="semantic-search-window-eyebrow"></html:p>
+          <html:h1 data-l10n-id="semantic-search-window-title"></html:h1>
+          <html:p class="subtitle" data-l10n-id="semantic-search-window-subtitle"></html:p>
+        </html:div>
+        <html:div class="hero-actions">
+          <html:button id="open-settings" type="button" data-l10n-id="semantic-search-open-settings"></html:button>
+          <html:button id="use-selected-item" type="button" data-l10n-id="semantic-search-use-selected"></html:button>
+          <html:button id="save-collection" type="button" disabled="disabled" data-l10n-id="semantic-search-save-collection"></html:button>
+          <html:button id="close-window" type="button" data-l10n-id="semantic-search-close"></html:button>
+        </html:div>
+      </html:section>
+
+      <html:section class="query-panel">
+        <html:div class="query-row">
+          <html:input id="query-input" type="text" data-l10n-id="semantic-search-query-input"/>
+          <html:button id="run-search" type="button" data-l10n-id="semantic-search-run"></html:button>
+        </html:div>
+        <html:div class="meta-row">
+          <html:span id="library-pill" class="pill"></html:span>
+          <html:span id="collection-pill" class="pill hidden"></html:span>
+          <html:span id="llm-pill" class="pill hidden"></html:span>
+          <html:span id="status-text" class="status"></html:span>
+        </html:div>
+      </html:section>
+
+      <html:section id="empty-state" class="empty-state">
+        <html:h2 data-l10n-id="semantic-search-empty-title"></html:h2>
+        <html:p data-l10n-id="semantic-search-empty-body"></html:p>
+      </html:section>
+
+      <html:section id="results-section" class="results hidden">
+        <html:div class="summary-card">
+          <html:span class="summary-label" data-l10n-id="semantic-search-summary-label"></html:span>
+          <html:strong id="summary-text"></html:strong>
+        </html:div>
+
+        <html:table id="results-table">
+          <html:thead>
+            <html:tr>
+              <html:th data-l10n-id="semantic-search-table-rank"></html:th>
+              <html:th data-l10n-id="semantic-search-table-title"></html:th>
+              <html:th data-l10n-id="semantic-search-table-authors"></html:th>
+              <html:th data-l10n-id="semantic-search-table-year"></html:th>
+              <html:th data-l10n-id="semantic-search-table-source"></html:th>
+              <html:th data-l10n-id="semantic-search-table-score"></html:th>
+              <html:th data-l10n-id="semantic-search-table-why"></html:th>
+            </html:tr>
+          </html:thead>
+          <html:tbody id="results-body"></html:tbody>
+        </html:table>
+      </html:section>
+    </html:div>
+  </vbox>
+
+  <script src="semantic-search-core.js"></script>
+  <script src="semantic-search-settings.js"></script>
+  <script src="semantic-search-window.js"></script>
+</window>
