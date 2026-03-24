@@ -1,14 +1,20 @@
 {
   "manifest_version": 2,
   "name": "Semantic Library Search",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "List related papers from the current Zotero library with semantic-style local ranking.",
   "author": "OpenAI Codex",
+  "homepage_url": "https://example.com/semantic-library-search",
+  "icons": {
+    "48": "icons/semantic-search.svg",
+    "96": "icons/semantic-search.svg"
+  },
   "applications": {
     "zotero": {
-      "id": "semantic-library-search@local",
+      "id": "semantic-library-search@example.com",
+      "update_url": "https://example.com/semantic-library-search/updates.json",
       "strict_min_version": "8.0",
-      "strict_max_version": "8.*"
+      "strict_max_version": "9.*"
     }
   }
 }

@@ -36,7 +36,7 @@ python3 tools/build_xpi.py
 生成文件位置：
 
 ```text
-dist/semantic-library-search-0.2.0.xpi
+dist/semantic-library-search-0.2.3.xpi
 ```
 
 ## 安装
